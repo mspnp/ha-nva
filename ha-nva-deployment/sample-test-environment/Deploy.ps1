@@ -70,11 +70,21 @@ $nic2 = Get-AzureRmNetworkInterface -Name ha-nva-vm1-nic2 -ResourceGroupName $ne
 $vnet = Get-AzureRmVirtualNetwork -Name ha-nva-vnet -ResourceGroupName $networkResourceGroup.ResourceGroupName
 $route = New-AzureRmRouteConfig -Name default -AddressPrefix 0.0.0.0/0 -NextHopType VirtualAppliance -NextHopIpAddress $nic2.IpConfigurations[0].PrivateIpAddress
 $udr = New-AzureRmRouteTable -Name ha-nva-udr -ResourceGroupName $networkResourceGroup.ResourceGroupName -Location $Location -Route $route
-$vnet.Subnets[3].RouteTable = $udr
+foreach($subnet in $vnet.Subnets)
+{
+    if($subnet.Name -eq "dmz-internal") { 
+        $subnet.RouteTable = $udr
+    }
+}
 
 $route2 = New-AzureRmRouteConfig -Name web -AddressPrefix 10.0.1.0/24 -NextHopType VirtualAppliance -NextHopIpAddress $nic2.IpConfigurations[0].PrivateIpAddress
 $udr2 = New-AzureRmRouteTable -Name ha-nva-mgmt-udr -ResourceGroupName $networkResourceGroup.ResourceGroupName -Location $Location -Route $route2
-$vnet.Subnets[4].RouteTable = $udr2
+foreach($subnet in $vnet.Subnets)
+{
+    if($subnet.Name -eq "web") { 
+        $subnet.RouteTable = $udr2
+    }
+}
 Set-AzureRmVirtualNetwork -VirtualNetwork $vnet
 
 Write-Host "Deploying routing extension on NVA vms..."
