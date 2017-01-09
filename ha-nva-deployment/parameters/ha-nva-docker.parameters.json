@@ -15,7 +15,7 @@
         "nics": [
           {
             "isPublic": "false",
-            "subnetName": "dmz-internal",
+            "subnetName": "docker",
             "privateIPAllocationMethod": "dynamic",
             "isPrimary": "true",
             "enableIPForwarding": false,
