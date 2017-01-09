@@ -85,6 +85,16 @@ foreach($subnet in $vnet.Subnets)
         $subnet.RouteTable = $udr2
     }
 }
+
+$route3 = New-AzureRmRouteConfig -Name docker -AddressPrefix 10.0.2.0/24 -NextHopType VirtualAppliance -NextHopIpAddress $nic2.IpConfigurations[0].PrivateIpAddress
+$udr3 = New-AzureRmRouteTable -Name ha-nva-docker-udr -ResourceGroupName $networkResourceGroup.ResourceGroupName -Location $Location -Route $route3
+foreach($subnet in $vnet.Subnets)
+{
+    if($subnet.Name -eq "docker") { 
+        $subnet.RouteTable = $udr3
+    }
+}
+
 Set-AzureRmVirtualNetwork -VirtualNetwork $vnet
 
 Write-Host "Deploying routing extension on NVA vms..."
